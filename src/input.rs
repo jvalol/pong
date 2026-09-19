@@ -34,7 +34,9 @@ impl Input {
                 self.enter_pressed = pressed;
             }
             KeyboardKey::Escape => {
-                self.esc_pressed = true;
+                if pressed {
+                    self.esc_pressed = true;
+                }
             }
             _ => (),
         }
