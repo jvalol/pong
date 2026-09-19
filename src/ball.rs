@@ -7,9 +7,9 @@ pub struct Ball {
 }
 
 impl Ball {
-    pub fn new(position: cgmath::Vector2<f32>, radius: f32) -> Ball {
+    pub fn new(position: cgmath::Vector2<f32>, size: f32) -> Ball {
         Ball {
-            quad: Quad::new(position, (radius, radius).into()),
+            quad: Quad::new(position, (size, size).into()),
             velocity: (0.0, 0.0).into(),
             visible: true,
         }
@@ -20,7 +20,7 @@ impl Ball {
     }
 
     pub fn radius(&self) -> f32 {
-        self.quad.size.x
+        self.quad.size.x * 0.5
     }
 
     pub fn update_position(&mut self, position: cgmath::Vector2<f32>) {
