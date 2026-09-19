@@ -183,7 +183,6 @@ impl Game for PongGame {
   }
 
   fn resized(&mut self, window_size: (f32, f32)) {
-    let (width, height) = window_size;
-    self.state.win_text.render_text.position = (width * 0.5, height * 0.5).into();
+    self.state.layout(window_size.into());
   }
 }

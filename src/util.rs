@@ -3,19 +3,22 @@
 use crate::ball::Ball;
 use crate::player::Player;
 
-// Units per second. The playfield is 2.0 units across.
-pub const PLAYER_SPEED: f32 = 3.0;
-pub const BALL_SPEED: f32 = 1.5;
+// Speeds scale with the window so the game plays the same at any size.
+/// Paddle speed in window heights per second.
+pub const PLAYER_SPEED: f32 = 1.5;
+/// Ball speed in window widths per second.
+pub const BALL_SPEED: f32 = 0.75;
 
 const BOUNCE_ANGLE: f32 = std::f32::consts::FRAC_PI_2;
 
-pub fn calc_ball_velocity(ball: &Ball, player: &Player) -> cgmath::Vector2<f32> {
+/// The ball's velocity after bouncing off `player`, `speed` pixels per second away from it.
+pub fn calc_ball_velocity(ball: &Ball, player: &Player, speed: f32) -> cgmath::Vector2<f32> {
     let diff_y = ball.position().y - player.position().y;
     let ratio = diff_y / player.size().y * 0.5;
     cgmath::Vector2 {
-        x: (BOUNCE_ANGLE * ratio).cos() * -player.position().x.signum(),
+        x: (BOUNCE_ANGLE * ratio).cos() * (ball.position().x - player.position().x).signum(),
         y: (BOUNCE_ANGLE * ratio).sin(),
-    } * BALL_SPEED
+    } * speed
 }
 
 #[macro_export]

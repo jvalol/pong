@@ -2,6 +2,7 @@ use crate::any;
 use crate::input::Input;
 use crate::pong_game::*;
 use crate::state::*;
+use crate::player::Player;
 use crate::util;
 
 pub trait System {
@@ -42,8 +43,8 @@ impl System for MenuSystem {
   fn start(&mut self, state: &mut State) {
     state.player1.score = 0;
     state.player2.score = 0;
-    state.player1.update_y_position(0.0);
-    state.player2.update_y_position(0.0);
+    state.player1.update_y_position(state.field.y * 0.5);
+    state.player2.update_y_position(state.field.y * 0.5);
     state.play_button.render_text.focused = true;
     state.quit_button.render_text.focused = false;
   }
@@ -89,63 +90,36 @@ impl System for PlaySystem {
       input.esc_pressed = false;
     }
 
-    if input.p1_up_pressed {
-      let position = (
-        state.player1.position().x,
-        state.player1.position().y + util::PLAYER_SPEED * state.delta_time,
-      );
-      state.player1.update_position(position.into());
-    }
-    if input.p1_down_pressed {
-      let position = (
-        state.player1.position().x,
-        state.player1.position().y - util::PLAYER_SPEED * state.delta_time,
-      );
-      state.player1.update_position(position.into());
-    }
-    if input.p2_up_pressed {
-      let position = (
-        state.player2.position().x,
-        state.player2.position().y + util::PLAYER_SPEED * state.delta_time,
-      );
-      state.player2.update_position(position.into());
-    }
-    if input.p2_down_pressed {
-      let position = (
-        state.player2.position().x,
-        state.player2.position().y - util::PLAYER_SPEED * state.delta_time,
-      );
-      state.player2.update_position(position.into());
-    }
-
-    // normalize players
-    if state.player1.position().y > 1.0 - state.player1.size().y * 0.5 {
-      let position = (
-        state.player1.position().x,
-        1.0 - state.player1.size().y * 0.5,
-      );
-      state.player1.update_position(position.into());
-    } else if state.player1.position().y < state.player1.size().y * 0.5 - 1.0 {
-      let position = (
-        state.player1.position().x,
-        state.player1.size().y * 0.5 - 1.0,
-      );
-      state.player1.update_position(position.into());
-    }
-    if state.player2.position().y > 1.0 - state.player2.size().y * 0.5 {
-      let position = (
-        state.player2.position().x,
-        1.0 - state.player2.size().y * 0.5,
-      );
-      state.player2.update_position(position.into());
-    } else if state.player2.position().y < state.player2.size().y * 0.5 - 1.0 {
-      let position = (
-        state.player2.position().x,
-        state.player2.size().y * 0.5 - 1.0,
-      );
-      state.player2.update_position(position.into());
-    }
+    let step = util::PLAYER_SPEED * state.field.y * state.delta_time;
+    let field_height = state.field.y;
+    move_player(
+      &mut state.player1,
+      input.p1_up_pressed,
+      input.p1_down_pressed,
+      step,
+      field_height,
+    );
+    move_player(
+      &mut state.player2,
+      input.p2_up_pressed,
+      input.p2_down_pressed,
+      step,
+      field_height,
+    );
   }
+}
+
+/// Moves a paddle up or down by `step` pixels and keeps it inside the window.
+fn move_player(player: &mut Player, up: bool, down: bool, step: f32, field_height: f32) {
+  let mut y = player.position().y;
+  if up {
+    y -= step;
+  }
+  if down {
+    y += step;
+  }
+  let half_height = player.size().y * 0.5;
+  player.update_y_position(y.max(half_height).min(field_height - half_height));
 }
 
 #[derive(Debug)]
@@ -179,30 +153,33 @@ impl System for BallSystem {
       // move the ball out to the paddle's right face so it doesn't bounce again next frame
       let x = state.player1.position().x + state.player1.size().x * 0.5 + state.ball.radius();
       state.ball.update_position((x, state.ball.position().y).into());
-      state.ball.velocity = util::calc_ball_velocity(&state.ball, &state.player1);
+      state.ball.velocity =
+        util::calc_ball_velocity(&state.ball, &state.player1, util::BALL_SPEED * state.field.x);
     } else if state.player2.contains(&state.ball) {
       events.push(Event::BallBounce(state.ball.position()));
       // move the ball out to the paddle's left face so it doesn't bounce again next frame
       let x = state.player2.position().x - state.player2.size().x * 0.5 - state.ball.radius();
       state.ball.update_position((x, state.ball.position().y).into());
-      state.ball.velocity = util::calc_ball_velocity(&state.ball, &state.player2);
+      state.ball.velocity =
+        util::calc_ball_velocity(&state.ball, &state.player2, util::BALL_SPEED * state.field.x);
     }
 
     state
       .ball
       .update_position(state.ball.position() + state.ball.velocity * state.delta_time);
-    let wall = 1.0 - state.ball.radius();
-    if state.ball.position().y > wall {
+    let top = state.ball.radius();
+    let bottom = state.field.y - state.ball.radius();
+    if state.ball.position().y < top {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.update_position((state.ball.position().x, wall).into());
+      state.ball.update_position((state.ball.position().x, top).into());
       state.ball.velocity.y *= -1.0;
-    } else if state.ball.position().y < -wall {
+    } else if state.ball.position().y > bottom {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.update_position((state.ball.position().x, -wall).into());
+      state.ball.update_position((state.ball.position().x, bottom).into());
       state.ball.velocity.y *= -1.0;
     }
 
-    if state.ball.position().x > 1.0 {
+    if state.ball.position().x > state.field.x {
       state.player1.score += 1;
       if state.player1.score >= 5 {
         state.game_state = GameState::GameOver;
@@ -210,7 +187,7 @@ impl System for BallSystem {
         state.game_state = GameState::Serving;
         events.push(Event::Score(0));
       }
-    } else if state.ball.position().x < -1.0 {
+    } else if state.ball.position().x < 0.0 {
       state.player2.score += 1;
       if state.player2.score >= 5 {
         state.game_state = GameState::GameOver;
@@ -237,9 +214,10 @@ impl ServingSystem {
 impl System for ServingSystem {
   fn start(&mut self, state: &mut State) {
     self.last_time = std::time::Instant::now();
-    let direction = state.ball.position().x.signum();
-    state.ball.update_position((0.0, 0.0).into());
-    state.ball.velocity = cgmath::Vector2::unit_x() * direction * -util::BALL_SPEED;
+    let direction = (state.ball.position().x - state.field.x * 0.5).signum();
+    state.ball.update_position(state.field * 0.5);
+    state.ball.velocity =
+      cgmath::Vector2::unit_x() * direction * -util::BALL_SPEED * state.field.x;
     state.player1_score.render_text.text = format!("{}", state.player1.score);
     state.player2_score.render_text.text = format!("{}", state.player2.score);
   }
