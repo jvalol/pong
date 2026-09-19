@@ -168,7 +168,7 @@ impl Game for PongGame {
   }
 
   fn focus_changed(&mut self, focus: bool) {
-    if !focus {
+    if !focus && self.state.game_state == GameState::Playing {
       self.pause_system.start(&mut self.state);
       self.state.pause_game();
     }

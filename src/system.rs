@@ -162,6 +162,8 @@ impl System for PauseSystem {
     if state.play_button.focused() && input.enter_pressed {
       events.push(Event::ButtonPressed);
       state.game_state = GameState::Playing;
+      state.title_text.render_text.text = String::from("PONG");
+      state.play_button.render_text.text = String::from("Play");
     }
   }
 }
