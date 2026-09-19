@@ -191,13 +191,14 @@ impl System for BallSystem {
     state
       .ball
       .update_position(state.ball.position() + state.ball.velocity * state.delta_time);
-    if state.ball.position().y > 1.0 {
+    let wall = 1.0 - state.ball.radius();
+    if state.ball.position().y > wall {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.update_position((state.ball.position().x, 1.0).into());
+      state.ball.update_position((state.ball.position().x, wall).into());
       state.ball.velocity.y *= -1.0;
-    } else if state.ball.position().y < -1.0 {
+    } else if state.ball.position().y < -wall {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.update_position((state.ball.position().x, -1.0).into());
+      state.ball.update_position((state.ball.position().x, -wall).into());
       state.ball.velocity.y *= -1.0;
     }
 
