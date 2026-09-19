@@ -107,8 +107,8 @@ impl State {
       win_text: PongText {
         visible: false,
         render_text: RenderText {
-          // position: (render.width() * 0.5, render.height() * 0.5).into(),
-          position: (200.0, 200.0).into(),
+          // centered in the window by PongGame::initialize
+          position: (0.0, 0.0).into(),
           bounds: (UNBOUNDED_F32, UNBOUNDED_F32).into(),
           size: 32.0,
           centered: true,

@@ -74,8 +74,10 @@ impl Game for PongGame {
     geometry: &mut Geometry,
     text_renderer: &mut TextRenderer,
     _sound_system: &SoundSystem,
-    _window_size: (f32, f32),
+    window_size: (f32, f32),
   ) {
+    let (width, height) = window_size;
+    self.state.win_text.render_text.position = (width * 0.5, height * 0.5).into();
     self.menu_system.start(&mut self.state);
     self.state.initialize(geometry, text_renderer);
   }
