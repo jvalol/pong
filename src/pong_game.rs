@@ -82,10 +82,13 @@ impl Game for PongGame {
 
   fn update(
     &mut self,
+    dt: f32,
     geometry: &mut Geometry,
     text_renderer: &mut TextRenderer,
     sound_system: &SoundSystem,
   ) {
+    self.state.delta_time = dt;
+
     for event in &self.events {
       match event {
         Event::FocusChanged | Event::ButtonPressed => {

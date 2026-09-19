@@ -92,28 +92,28 @@ impl System for PlaySystem {
     if input.p1_up_pressed {
       let position = (
         state.player1.position().x,
-        state.player1.position().y + util::PLAYER_SPEED,
+        state.player1.position().y + util::PLAYER_SPEED * state.delta_time,
       );
       state.player1.update_position(position.into());
     }
     if input.p1_down_pressed {
       let position = (
         state.player1.position().x,
-        state.player1.position().y - util::PLAYER_SPEED,
+        state.player1.position().y - util::PLAYER_SPEED * state.delta_time,
       );
       state.player1.update_position(position.into());
     }
     if input.p2_up_pressed {
       let position = (
         state.player2.position().x,
-        state.player2.position().y + util::PLAYER_SPEED,
+        state.player2.position().y + util::PLAYER_SPEED * state.delta_time,
       );
       state.player2.update_position(position.into());
     }
     if input.p2_down_pressed {
       let position = (
         state.player2.position().x,
-        state.player2.position().y - util::PLAYER_SPEED,
+        state.player2.position().y - util::PLAYER_SPEED * state.delta_time,
       );
       state.player2.update_position(position.into());
     }
@@ -187,7 +187,7 @@ impl System for BallSystem {
 
     state
       .ball
-      .update_position(state.ball.position() + state.ball.velocity);
+      .update_position(state.ball.position() + state.ball.velocity * state.delta_time);
     if state.ball.position().y > 1.0 {
       events.push(Event::BallBounce(state.ball.position()));
       state.ball.position().y = 1.0;

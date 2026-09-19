@@ -3,8 +3,9 @@
 use crate::ball::Ball;
 use crate::player::Player;
 
-pub const PLAYER_SPEED: f32 = 0.05;
-pub const BALL_SPEED: f32 = 0.025;
+// Units per second. The playfield is 2.0 units across.
+pub const PLAYER_SPEED: f32 = 3.0;
+pub const BALL_SPEED: f32 = 1.5;
 
 const BOUNCE_ANGLE: f32 = std::f32::consts::FRAC_PI_2;
 

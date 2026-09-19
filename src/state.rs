@@ -39,6 +39,8 @@ pub struct State {
   pub player1_score: PongText,
   pub player2_score: PongText,
   pub win_text: PongText,
+  /// Seconds since the previous update.
+  pub delta_time: f32,
   window_size: (f32, f32),
 }
 
@@ -46,6 +48,7 @@ impl State {
   pub fn new() -> Self {
     Self {
       game_state: GameState::MainMenu,
+      delta_time: 0.0,
       player1: Player::new((-0.8, 0.0).into(), (0.05, 0.4).into()),
       player2: Player::new((0.8, 0.0).into(), (0.05, 0.4).into()),
       ball: Ball::new((0.0, 0.0).into(), 0.05),
