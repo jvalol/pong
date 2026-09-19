@@ -176,12 +176,15 @@ impl System for BallSystem {
     // bounce the ball off the players
     if state.player1.contains(&state.ball) {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.position().x -= state.ball.velocity.x - state.player1.size().x;
+      // move the ball out to the paddle's right face so it doesn't bounce again next frame
+      let x = state.player1.position().x + state.player1.size().x * 0.5 + state.ball.radius();
+      state.ball.update_position((x, state.ball.position().y).into());
       state.ball.velocity = util::calc_ball_velocity(&state.ball, &state.player1);
     } else if state.player2.contains(&state.ball) {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.position().x -= state.ball.velocity.x + state.player2.size().x;
-      state.ball.velocity.x *= -state.player2.size().y;
+      // move the ball out to the paddle's left face so it doesn't bounce again next frame
+      let x = state.player2.position().x - state.player2.size().x * 0.5 - state.ball.radius();
+      state.ball.update_position((x, state.ball.position().y).into());
       state.ball.velocity = util::calc_ball_velocity(&state.ball, &state.player2);
     }
 
@@ -190,11 +193,11 @@ impl System for BallSystem {
       .update_position(state.ball.position() + state.ball.velocity * state.delta_time);
     if state.ball.position().y > 1.0 {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.position().y = 1.0;
+      state.ball.update_position((state.ball.position().x, 1.0).into());
       state.ball.velocity.y *= -1.0;
     } else if state.ball.position().y < -1.0 {
       events.push(Event::BallBounce(state.ball.position()));
-      state.ball.position().y = -1.0;
+      state.ball.update_position((state.ball.position().x, -1.0).into());
       state.ball.velocity.y *= -1.0;
     }
 
