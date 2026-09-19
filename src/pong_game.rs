@@ -76,8 +76,7 @@ impl Game for PongGame {
     _sound_system: &SoundSystem,
     window_size: (f32, f32),
   ) {
-    let (width, height) = window_size;
-    self.state.win_text.render_text.position = (width * 0.5, height * 0.5).into();
+    self.resized(window_size);
     self.menu_system.start(&mut self.state);
     self.state.initialize(geometry, text_renderer);
   }
@@ -181,5 +180,10 @@ impl Game for PongGame {
       self.pause_system.start(&mut self.state);
       self.state.pause_game();
     }
+  }
+
+  fn resized(&mut self, window_size: (f32, f32)) {
+    let (width, height) = window_size;
+    self.state.win_text.render_text.position = (width * 0.5, height * 0.5).into();
   }
 }
