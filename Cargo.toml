@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 dynamo_lib = { path = "../dynamo_lib" }
 cgmath = "0.17"
-rodio = "0.11"
+rodio = { version = "0.22", default-features = false, features = ["wav"] }
