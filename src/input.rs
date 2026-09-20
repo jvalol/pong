@@ -33,11 +33,9 @@ impl Input {
             KeyboardKey::Return => {
                 self.enter_pressed = pressed;
             }
-            KeyboardKey::Escape => {
-                if pressed && !input.repeat {
+            KeyboardKey::Escape if pressed && !input.repeat => {
                     self.esc_pressed = true;
                 }
-            }
             _ => (),
         }
     }

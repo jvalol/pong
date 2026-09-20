@@ -176,7 +176,7 @@ impl State {
   }
 
   fn update_text(&self, text_renderer: &mut TextRenderer) {
-    for text in vec![
+    for text in [
       &self.title_text,
       &self.play_button,
       &self.quit_button,
