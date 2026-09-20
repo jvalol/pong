@@ -33,7 +33,7 @@ pub enum Event {
   ButtonPressed,
   FocusChanged,
   BallBounce(cgmath::Vector2<f32>),
-  Score(u32),
+  Score,
 }
 
 pub struct PongGame {
@@ -98,7 +98,7 @@ impl Game for PongGame {
         Event::BallBounce(_pos) => {
           sound_system.queue(self.sound_pack.bounce());
         }
-        Event::Score(_) => {
+        Event::Score => {
           sound_system.queue(self.sound_pack.bounce());
         }
       }

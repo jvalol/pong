@@ -185,7 +185,7 @@ impl System for BallSystem {
         state.game_state = GameState::GameOver;
       } else {
         state.game_state = GameState::Serving;
-        events.push(Event::Score(0));
+        events.push(Event::Score);
       }
     } else if state.ball.position().x < 0.0 {
       state.player2.score += 1;
@@ -193,7 +193,7 @@ impl System for BallSystem {
         state.game_state = GameState::GameOver;
       } else {
         state.game_state = GameState::Serving;
-        events.push(Event::Score(1));
+        events.push(Event::Score);
       }
     }
   }
