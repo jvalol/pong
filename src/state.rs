@@ -198,3 +198,74 @@ impl State {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn state_of(width: f32, height: f32) -> State {
+    let mut state = State::new();
+    state.layout((width, height).into());
+    state
+  }
+
+  #[test]
+  fn layout_sizes_pieces_from_the_window() {
+    let state = state_of(800.0, 600.0);
+
+    assert_eq!(state.player1.size().x, 20.0);
+    assert_eq!(state.player1.size().y, 120.0);
+    assert_eq!(state.player2.size(), state.player1.size());
+    assert_eq!(state.ball.quad.size.x, 20.0);
+  }
+
+  #[test]
+  fn ball_is_square_in_a_wide_window() {
+    let state = state_of(1600.0, 400.0);
+
+    assert_eq!(state.ball.quad.size.x, state.ball.quad.size.y);
+  }
+
+  #[test]
+  fn paddles_sit_inside_each_edge() {
+    let state = state_of(800.0, 600.0);
+
+    assert_eq!(state.player1.position().x, 80.0);
+    assert_eq!(state.player2.position().x, 720.0);
+  }
+
+  #[test]
+  fn first_layout_centers_everything() {
+    let state = state_of(800.0, 600.0);
+
+    assert_eq!(state.ball.position().x, 400.0);
+    assert_eq!(state.ball.position().y, 300.0);
+    assert_eq!(state.player1.position().y, 300.0);
+    assert_eq!(state.player2.position().y, 300.0);
+  }
+
+  #[test]
+  fn resize_scales_positions() {
+    let mut state = state_of(800.0, 600.0);
+    state.ball.update_position((200.0, 150.0).into());
+    state.ball.velocity = (100.0, 50.0).into();
+
+    state.layout((1600.0, 1200.0).into());
+
+    assert_eq!(state.ball.position().x, 400.0);
+    assert_eq!(state.ball.position().y, 300.0);
+    assert_eq!(state.ball.velocity.x, 200.0);
+    assert_eq!(state.ball.velocity.y, 100.0);
+  }
+
+  #[test]
+  fn layout_centers_win_text() {
+    let mut state = state_of(800.0, 600.0);
+    assert_eq!(state.win_text.render_text.position.x, 400.0);
+
+    state.layout((1000.0, 500.0).into());
+
+    assert_eq!(state.win_text.render_text.position.x, 500.0);
+    assert_eq!(state.win_text.render_text.position.y, 250.0);
+  }
+}

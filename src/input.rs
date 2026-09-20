@@ -59,3 +59,31 @@ impl Input {
         self.esc_pressed = false;
     }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use dynamo_lib::keyboard::{KeyboardKey, KeyboardKeyState};
+
+  fn escape(state: KeyboardKeyState, repeat: bool) -> KeyboardInput {
+    KeyboardInput::new(KeyboardKey::Escape, state, repeat)
+  }
+
+  #[test]
+  fn escape_ignores_key_repeat() {
+    let mut input = Input::new();
+    input.update(escape(KeyboardKeyState::Pressed, true));
+
+    assert!(!input.esc_pressed);
+  }
+
+  #[test]
+  fn escape_ignores_release() {
+    let mut input = Input::new();
+    input.update(escape(KeyboardKeyState::Released, false));
+    assert!(!input.esc_pressed);
+
+    input.update(escape(KeyboardKeyState::Pressed, false));
+    assert!(input.esc_pressed);
+  }
+}

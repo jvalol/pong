@@ -280,3 +280,249 @@ impl System for GameOverSystem {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  const FRAME: f32 = 1.0 / 60.0;
+
+  fn playing_state() -> State {
+    let mut state = State::new();
+    state.layout((800.0, 600.0).into());
+    state.game_state = GameState::Playing;
+    state.delta_time = FRAME;
+    state
+  }
+
+  fn play(input: &mut Input, state: &mut State) {
+    PlaySystem.update_state(input, state, &mut Vec::new());
+  }
+
+  fn step_ball(state: &mut State) {
+    BallSystem.update_state(&mut Input::new(), state, &mut Vec::new());
+  }
+
+  #[test]
+  fn up_moves_the_paddle_up() {
+    let mut state = playing_state();
+    let mut input = Input::new();
+    input.p1_up_pressed = true;
+    play(&mut input, &mut state);
+
+    assert!(state.player1.position().y < 300.0);
+  }
+
+  #[test]
+  fn down_moves_the_paddle_down() {
+    let mut state = playing_state();
+    let mut input = Input::new();
+    input.p2_down_pressed = true;
+    play(&mut input, &mut state);
+
+    assert!(state.player2.position().y > 300.0);
+  }
+
+  #[test]
+  fn paddle_movement_scales_with_delta_time() {
+    let mut input = Input::new();
+    input.p1_up_pressed = true;
+
+    let mut one_frame = playing_state();
+    play(&mut input, &mut one_frame);
+
+    let mut two_frames = playing_state();
+    two_frames.delta_time = FRAME * 2.0;
+    play(&mut input, &mut two_frames);
+
+    let short = 300.0 - one_frame.player1.position().y;
+    let long = 300.0 - two_frames.player1.position().y;
+
+    assert!((long - short * 2.0).abs() < 0.001);
+  }
+
+  #[test]
+  fn paddle_stops_at_the_top() {
+    let mut state = playing_state();
+    state.delta_time = 1.0;
+    let mut input = Input::new();
+    input.p1_up_pressed = true;
+    play(&mut input, &mut state);
+
+    assert_eq!(state.player1.position().y, state.player1.size().y * 0.5);
+  }
+
+  #[test]
+  fn paddle_stops_at_the_bottom() {
+    let mut state = playing_state();
+    state.delta_time = 1.0;
+    let mut input = Input::new();
+    input.p1_down_pressed = true;
+    play(&mut input, &mut state);
+
+    assert_eq!(
+      state.player1.position().y,
+      state.field.y - state.player1.size().y * 0.5
+    );
+  }
+
+  #[test]
+  fn opposite_keys_cancel() {
+    let mut state = playing_state();
+    let mut input = Input::new();
+    input.p1_up_pressed = true;
+    input.p1_down_pressed = true;
+    play(&mut input, &mut state);
+
+    assert_eq!(state.player1.position().y, 300.0);
+  }
+
+  #[test]
+  fn ball_moves_with_delta_time() {
+    let mut state = playing_state();
+    state.delta_time = 0.5;
+    state.ball.velocity = (100.0, 0.0).into();
+    step_ball(&mut state);
+
+    assert_eq!(state.ball.position().x, 450.0);
+  }
+
+  #[test]
+  fn paddle_bounce_reverses_the_ball() {
+    let mut state = playing_state();
+    state.ball.update_position(state.player1.position());
+    state.ball.velocity = (-100.0, 0.0).into();
+    step_ball(&mut state);
+
+    assert!(state.ball.velocity.x > 0.0);
+  }
+
+  #[test]
+  fn paddle_bounce_moves_the_ball_clear() {
+    let mut state = playing_state();
+    state.ball.update_position(state.player1.position());
+    state.ball.velocity = (-100.0, 0.0).into();
+    step_ball(&mut state);
+
+    assert!(!state.player1.contains(&state.ball));
+  }
+
+  #[test]
+  fn ball_bounces_off_the_top() {
+    let mut state = playing_state();
+    let radius = state.ball.radius();
+    state.ball.update_position((400.0, radius + 1.0).into());
+    state.ball.velocity = (0.0, -100.0).into();
+    state.delta_time = 1.0;
+    step_ball(&mut state);
+
+    assert_eq!(state.ball.position().y, radius);
+    assert!(state.ball.velocity.y > 0.0);
+  }
+
+  #[test]
+  fn ball_bounces_off_the_bottom() {
+    let mut state = playing_state();
+    let floor = state.field.y - state.ball.radius();
+    state.ball.update_position((400.0, floor - 1.0).into());
+    state.ball.velocity = (0.0, 100.0).into();
+    state.delta_time = 1.0;
+    step_ball(&mut state);
+
+    assert_eq!(state.ball.position().y, floor);
+    assert!(state.ball.velocity.y < 0.0);
+  }
+
+  #[test]
+  fn ball_past_the_right_scores_for_player_one() {
+    let mut state = playing_state();
+    state.ball.update_position((900.0, 300.0).into());
+    step_ball(&mut state);
+
+    assert_eq!(state.player1.score, 1);
+    assert_eq!(state.player2.score, 0);
+    assert_eq!(state.game_state, GameState::Serving);
+  }
+
+  #[test]
+  fn ball_past_the_left_scores_for_player_two() {
+    let mut state = playing_state();
+    state.ball.update_position((-10.0, 300.0).into());
+    step_ball(&mut state);
+
+    assert_eq!(state.player2.score, 1);
+    assert_eq!(state.game_state, GameState::Serving);
+  }
+
+  #[test]
+  fn fifth_point_ends_the_game() {
+    let mut state = playing_state();
+    state.player1.score = 4;
+    state.ball.update_position((900.0, 300.0).into());
+    step_ball(&mut state);
+
+    assert_eq!(state.player1.score, 5);
+    assert_eq!(state.game_state, GameState::GameOver);
+  }
+
+  #[test]
+  fn serve_starts_in_the_middle() {
+    let mut state = playing_state();
+    // player one just scored, so the ball left on the right
+    state.ball.update_position((900.0, 300.0).into());
+    ServingSystem::new().start(&mut state);
+
+    assert_eq!(state.ball.position().x, 400.0);
+    assert_eq!(state.ball.position().y, 300.0);
+    // served back toward the player who conceded
+    assert!(state.ball.velocity.x < 0.0);
+  }
+
+  #[test]
+  fn escape_returns_to_the_menu() {
+    let mut state = playing_state();
+    let mut input = Input::new();
+    input.esc_pressed = true;
+    play(&mut input, &mut state);
+
+    assert_eq!(state.game_state, GameState::MainMenu);
+  }
+
+  #[test]
+  fn escape_quits_from_the_menu() {
+    let mut state = State::new();
+    state.layout((800.0, 600.0).into());
+    let mut input = Input::new();
+    input.esc_pressed = true;
+    MenuSystem.update_state(&mut input, &mut state, &mut Vec::new());
+
+    assert_eq!(state.game_state, GameState::Quitting);
+  }
+
+  #[test]
+  fn returning_to_the_menu_resets_the_score() {
+    let mut state = playing_state();
+    state.player1.score = 3;
+    state.player2.score = 2;
+    MenuSystem.start(&mut state);
+
+    assert_eq!(state.player1.score, 0);
+    assert_eq!(state.player2.score, 0);
+  }
+
+  #[test]
+  fn resuming_restores_the_menu_text() {
+    let mut state = playing_state();
+    PauseSystem.start(&mut state);
+    state.game_state = GameState::Paused;
+    assert_eq!(state.play_button.render_text.text, "Resume");
+
+    let mut input = Input::new();
+    input.enter_pressed = true;
+    PauseSystem.update_state(&mut input, &mut state, &mut Vec::new());
+
+    assert_eq!(state.game_state, GameState::Playing);
+    assert_eq!(state.title_text.render_text.text, "PONG");
+    assert_eq!(state.play_button.render_text.text, "Play");
+  }
+}

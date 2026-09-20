@@ -186,3 +186,34 @@ impl Game for PongGame {
     self.state.layout(window_size.into());
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn game_in(game_state: GameState) -> PongGame {
+    let mut game = PongGame::new();
+    game.state.layout((800.0, 600.0).into());
+    game.state.game_state = game_state;
+    game
+  }
+
+  #[test]
+  fn losing_focus_while_playing_pauses() {
+    let mut game = game_in(GameState::Playing);
+    game.focus_changed(false);
+
+    assert_eq!(game.state.game_state, GameState::Paused);
+    assert_eq!(game.state.play_button.render_text.text, "Resume");
+  }
+
+  #[test]
+  fn losing_focus_on_the_menu_does_nothing() {
+    let mut game = game_in(GameState::MainMenu);
+    game.focus_changed(false);
+
+    assert_eq!(game.state.game_state, GameState::MainMenu);
+    assert_eq!(game.state.title_text.render_text.text, "PONG");
+    assert_eq!(game.state.play_button.render_text.text, "Play");
+  }
+}
