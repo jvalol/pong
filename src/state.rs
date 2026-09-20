@@ -1,7 +1,7 @@
 use crate::ball::Ball;
 use crate::player::Player;
-use dynamo_lib::geometry::Geometry;
-use dynamo_lib::renderer::render_text::{RenderText, TextRenderer, UNBOUNDED_F32};
+use blitkit::geometry::Geometry;
+use blitkit::renderer::render_text::{RenderText, TextRenderer, UNBOUNDED_F32};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum GameState {

@@ -1,4 +1,4 @@
-use dynamo_lib::geometry::quad::Quad;
+use blitkit::geometry::quad::Quad;
 
 pub struct Ball {
     pub quad: Quad,
