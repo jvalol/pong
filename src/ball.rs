@@ -2,12 +2,12 @@ use blitkit::geometry::quad::Quad;
 
 pub struct Ball {
     pub quad: Quad,
-    pub velocity: cgmath::Vector2<f32>,
+    pub velocity: glam::Vec2,
     pub visible: bool,
 }
 
 impl Ball {
-    pub fn new(position: cgmath::Vector2<f32>, size: f32) -> Ball {
+    pub fn new(position: glam::Vec2, size: f32) -> Ball {
         Ball {
             quad: Quad::new(position, (size, size).into()),
             velocity: (0.0, 0.0).into(),
@@ -15,7 +15,7 @@ impl Ball {
         }
     }
 
-    pub fn position(&self) -> cgmath::Vector2<f32> {
+    pub fn position(&self) -> glam::Vec2 {
         self.quad.position
     }
 
@@ -23,7 +23,7 @@ impl Ball {
         self.quad.size.x * 0.5
     }
 
-    pub fn update_position(&mut self, position: cgmath::Vector2<f32>) {
+    pub fn update_position(&mut self, position: glam::Vec2) {
         self.quad = Quad::new(position, self.quad.size);
     }
 }

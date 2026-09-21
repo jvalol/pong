@@ -42,7 +42,7 @@ pub struct State {
   /// Seconds since the previous update.
   pub delta_time: f32,
   /// Window size in pixels. Everything in the game is laid out relative to it.
-  pub field: cgmath::Vector2<f32>,
+  pub field: glam::Vec2,
 }
 
 impl State {
@@ -123,17 +123,17 @@ impl State {
 
   /// Sizes and places the paddles, ball, and win text for a window of `size` pixels.
   /// When the window changes size mid-game, positions and the ball's velocity scale with it.
-  pub fn layout(&mut self, size: cgmath::Vector2<f32>) {
+  pub fn layout(&mut self, size: glam::Vec2) {
     let old = self.field;
     self.field = size;
 
-    let paddle_size = cgmath::Vector2::new(size.x * 0.025, size.y * 0.2);
+    let paddle_size = glam::vec2(size.x * 0.025, size.y * 0.2);
     self.player1.quad.size = paddle_size;
     self.player2.quad.size = paddle_size;
     self.ball.quad.size = (size.x * 0.025, size.x * 0.025).into();
 
     if old.x > 0.0 && old.y > 0.0 {
-      let scale = |v: cgmath::Vector2<f32>| -> cgmath::Vector2<f32> {
+      let scale = |v: glam::Vec2| -> glam::Vec2 {
         (v.x * size.x / old.x, v.y * size.y / old.y).into()
       };
       self.player1.update_y_position(self.player1.position().y * size.y / old.y);

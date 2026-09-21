@@ -217,7 +217,7 @@ impl System for ServingSystem {
     let direction = (state.ball.position().x - state.field.x * 0.5).signum();
     state.ball.update_position(state.field * 0.5);
     state.ball.velocity =
-      cgmath::Vector2::unit_x() * direction * -util::BALL_SPEED * state.field.x;
+      glam::Vec2::X * direction * -util::BALL_SPEED * state.field.x;
     state.player1_score.render_text.text = format!("{}", state.player1.score);
     state.player2_score.render_text.text = format!("{}", state.player2.score);
   }

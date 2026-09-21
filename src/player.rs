@@ -8,7 +8,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(position: cgmath::Vector2<f32>, size: cgmath::Vector2<f32>) -> Player {
+    pub fn new(position: glam::Vec2, size: glam::Vec2) -> Player {
         Player {
             quad: Quad::new(position, size),
             score: 0,
@@ -16,11 +16,11 @@ impl Player {
         }
     }
 
-    pub fn position(&self) -> cgmath::Vector2<f32> {
+    pub fn position(&self) -> glam::Vec2 {
         self.quad.position
     }
 
-    pub fn size(&self) -> cgmath::Vector2<f32> {
+    pub fn size(&self) -> glam::Vec2 {
         self.quad.size
     }
 
@@ -29,7 +29,7 @@ impl Player {
         self.update_position(position.into());
     }
 
-    pub fn update_position(&mut self, position: cgmath::Vector2<f32>) {
+    pub fn update_position(&mut self, position: glam::Vec2) {
         self.quad = Quad::new(position, self.quad.size);
     }
 
@@ -38,10 +38,7 @@ impl Player {
         let min = self.position() - radii;
         let max = self.position() + radii;
 
-        let b_radii = cgmath::Vector2 {
-            x: ball.radius(),
-            y: ball.radius(),
-        };
+        let b_radii = glam::Vec2::splat(ball.radius());
         let b_min = ball.position() - b_radii;
         let b_max = ball.position() + b_radii;
 

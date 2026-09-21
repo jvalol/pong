@@ -32,7 +32,7 @@ impl SoundPack {
 pub enum Event {
   ButtonPressed,
   FocusChanged,
-  BallBounce(cgmath::Vector2<f32>),
+  BallBounce(glam::Vec2),
   Score,
 }
 
