@@ -1,5 +1,5 @@
 use crate::ball::Ball;
-use blitkit::geometry::quad::Quad;
+use blitzkit::geometry::quad::Quad;
 
 pub struct Player {
     pub quad: Quad,

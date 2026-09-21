@@ -1,7 +1,7 @@
 # pong
 
-Two paddles, a ball, five points to win. Built on `blitkit`, which lives at
-`../rust/blitkit` and owns the window, rendering, input, and sound.
+Two paddles, a ball, five points to win. Built on `blitzkit`, which lives at
+`../rust/blitzkit` and owns the window, rendering, input, and sound.
 
 ## Build and test
 
@@ -29,7 +29,7 @@ Behavior changes are spec driven:
 
 ## Layout
 
-- `src/main.rs` — hands a `PongGame` to `blitkit::start`.
+- `src/main.rs` — hands a `PongGame` to `blitzkit::start`.
 - `src/pong_game.rs` — the `Game` impl, the event list, sound.
 - `src/state.rs` — everything the game knows, and `layout()` which sizes it all.
 - `src/system.rs` — one system per game state, each stepping the state.
