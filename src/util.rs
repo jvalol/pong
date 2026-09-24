@@ -32,22 +32,22 @@ macro_rules! any {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use super::*;
 
-  #[test]
-  fn bounce_angle_depends_on_where_it_hits() {
-    // the left paddle, 120 tall, centered at y 300
-    let player = Player::new((80.0, 300.0).into(), (20.0, 120.0).into());
-    let centered = Ball::new((100.0, 300.0).into(), 20.0);
-    let near_the_end = Ball::new((100.0, 260.0).into(), 20.0);
+    #[test]
+    fn bounce_angle_depends_on_where_it_hits() {
+        // the left paddle, 120 tall, centered at y 300
+        let player = Player::new((80.0, 300.0).into(), (20.0, 120.0).into());
+        let centered = Ball::new((100.0, 300.0).into(), 20.0);
+        let near_the_end = Ball::new((100.0, 260.0).into(), 20.0);
 
-    let straight = calc_ball_velocity(&centered, &player, 600.0);
-    let angled = calc_ball_velocity(&near_the_end, &player, 600.0);
+        let straight = calc_ball_velocity(&centered, &player, 600.0);
+        let angled = calc_ball_velocity(&near_the_end, &player, 600.0);
 
-    // both leave to the right, away from the paddle
-    assert!(straight.x > 0.0);
-    assert!(angled.x > 0.0);
-    // a hit away from the center leaves at more of an angle
-    assert!(angled.y.abs() > straight.y.abs());
-  }
+        // both leave to the right, away from the paddle
+        assert!(straight.x > 0.0);
+        assert!(angled.x > 0.0);
+        // a hit away from the center leaves at more of an angle
+        assert!(angled.y.abs() > straight.y.abs());
+    }
 }

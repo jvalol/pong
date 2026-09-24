@@ -34,8 +34,8 @@ impl Input {
                 self.enter_pressed = pressed;
             }
             KeyboardKey::Escape if pressed && !input.repeat => {
-                    self.esc_pressed = true;
-                }
+                self.esc_pressed = true;
+            }
             _ => (),
         }
     }
@@ -60,28 +60,28 @@ impl Input {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use blitzkit::keyboard::{KeyboardKey, KeyboardKeyState};
+    use super::*;
+    use blitzkit::keyboard::{KeyboardKey, KeyboardKeyState};
 
-  fn escape(state: KeyboardKeyState, repeat: bool) -> KeyboardInput {
-    KeyboardInput::new(KeyboardKey::Escape, state, repeat)
-  }
+    fn escape(state: KeyboardKeyState, repeat: bool) -> KeyboardInput {
+        KeyboardInput::new(KeyboardKey::Escape, state, repeat)
+    }
 
-  #[test]
-  fn escape_ignores_key_repeat() {
-    let mut input = Input::new();
-    input.update(escape(KeyboardKeyState::Pressed, true));
+    #[test]
+    fn escape_ignores_key_repeat() {
+        let mut input = Input::new();
+        input.update(escape(KeyboardKeyState::Pressed, true));
 
-    assert!(!input.esc_pressed);
-  }
+        assert!(!input.esc_pressed);
+    }
 
-  #[test]
-  fn escape_ignores_release() {
-    let mut input = Input::new();
-    input.update(escape(KeyboardKeyState::Released, false));
-    assert!(!input.esc_pressed);
+    #[test]
+    fn escape_ignores_release() {
+        let mut input = Input::new();
+        input.update(escape(KeyboardKeyState::Released, false));
+        assert!(!input.esc_pressed);
 
-    input.update(escape(KeyboardKeyState::Pressed, false));
-    assert!(input.esc_pressed);
-  }
+        input.update(escape(KeyboardKeyState::Pressed, false));
+        assert!(input.esc_pressed);
+    }
 }
