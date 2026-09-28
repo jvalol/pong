@@ -18,8 +18,14 @@ starts. The scores are redrawn here.
 **Playing.** The rally, per spec 0003.
 
 **Paused.** Losing window focus during play pauses the game and shows Paused with
-Resume. Enter resumes and puts the menu's own wording back. Losing focus anywhere
-else, such as on the menu or the game over screen, changes nothing.
+Resume. Enter resumes and puts the menu's own wording back, and Escape leaves for
+the menu the way it does during play, so a pause is not the one state the key
+stops working in. Losing focus anywhere else, such as on the menu or the game
+over screen, changes nothing.
+
+The menu restores its own wording when it starts, rather than trusting whatever
+left it to tidy up. It is reachable from a pause now, which had overwritten the
+title and the button.
 
 **Game over.** The winner is named for five seconds, then the game returns to the
 menu. Escape quits from here.
@@ -36,6 +42,9 @@ holding it doesn't carry into the menu and quit the game.
 - Losing focus while playing pauses. — `pong_game::tests::losing_focus_while_playing_pauses`
 - Losing focus on the menu changes nothing. — `pong_game::tests::losing_focus_on_the_menu_does_nothing`
 - Resuming restores the menu wording. — `system::tests::resuming_restores_the_menu_text`
+- Escape leaves a paused game. — `system::tests::escape_leaves_a_paused_game`
+- The menu it arrives at reads like the menu, not like the pause it came from.
+  — `pong_game::tests::escaping_out_of_a_pause_arrives_at_a_real_menu`
 - Escape is ignored on key repeat. — `input::tests::escape_ignores_key_repeat`
 - Escape is ignored on release. — `input::tests::escape_ignores_release`
 
