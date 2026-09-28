@@ -45,6 +45,10 @@ impl System for MenuSystem {
         state.player2.score = 0;
         state.player1.update_y_position(state.field.y * 0.5);
         state.player2.update_y_position(state.field.y * 0.5);
+        // a pause leaves "Paused" and "Resume" behind, and the menu is now
+        // reachable from one
+        state.title_text.render_text.text = String::from("PONG");
+        state.play_button.render_text.text = String::from("Play");
         state.play_button.render_text.focused = true;
         state.quit_button.render_text.focused = false;
     }
@@ -133,6 +137,17 @@ impl System for PauseSystem {
     }
 
     fn update_state(&self, input: &mut Input, state: &mut State, events: &mut Vec<Event>) {
+        // the same way out that playing has, so a paused game is not a place
+        // escape stops working
+        if input.esc_pressed {
+            input.clear();
+            events.push(Event::ButtonPressed);
+            state.game_state = GameState::MainMenu;
+
+            input.esc_pressed = false;
+            return;
+        }
+
         if state.play_button.focused() && input.enter_pressed {
             events.push(Event::ButtonPressed);
             state.game_state = GameState::Playing;
@@ -521,6 +536,20 @@ mod tests {
 
         assert_eq!(state.player1.score, 0);
         assert_eq!(state.player2.score, 0);
+    }
+
+    #[test]
+    fn escape_leaves_a_paused_game() {
+        let mut state = playing_state();
+        PauseSystem.start(&mut state);
+        state.game_state = GameState::Paused;
+
+        let mut input = Input::new();
+        input.esc_pressed = true;
+        PauseSystem.update_state(&mut input, &mut state, &mut Vec::new());
+
+        assert_eq!(state.game_state, GameState::MainMenu);
+        assert!(!input.esc_pressed, "the menu would quit on the same press");
     }
 
     #[test]
