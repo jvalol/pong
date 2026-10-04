@@ -48,6 +48,14 @@ pub struct PongGame {
     game_over_system: GameOverSystem,
     visibility_system: VisibilitySystem,
     sound_pack: SoundPack,
+    /// Whether this run is only here to be photographed, and whether it has
+    /// been posed yet. See `refresh-screenshots` in the project above.
+    ///
+    /// The pose cannot be set before the window opens: everything here is laid
+    /// out relative to the field, and the field is the window. So it waits for
+    /// the first frame and then does what the menu does when you press a key.
+    staged: bool,
+    posed: bool,
 }
 
 impl PongGame {
@@ -64,6 +72,8 @@ impl PongGame {
             game_over_system: GameOverSystem::new(),
             visibility_system: VisibilitySystem,
             sound_pack: SoundPack::new(),
+            staged: crate::staged(),
+            posed: false,
         }
     }
 }
@@ -89,6 +99,14 @@ impl Game for PongGame {
         sound_system: &SoundSystem,
     ) {
         self.state.delta_time = dt;
+
+        // a photograph of the main menu says nothing about pong, so a staged
+        // run serves itself and the picture is taken while the ball is in play
+        if self.staged && !self.posed {
+            self.posed = true;
+            self.state.game_state = GameState::Serving;
+            self.serving_system.start(&mut self.state);
+        }
 
         for event in &self.events {
             match event {
@@ -177,6 +195,12 @@ impl Game for PongGame {
     }
 
     fn focus_changed(&mut self, focus: bool) {
+        // a staged run is photographed from behind the terminal, so it never
+        // has focus and pausing on losing it would photograph the pause screen
+        if self.staged {
+            return;
+        }
+
         if !focus && self.state.game_state == GameState::Playing {
             self.pause_system.start(&mut self.state);
             self.state.pause_game();
