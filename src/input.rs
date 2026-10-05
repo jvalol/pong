@@ -40,14 +40,6 @@ impl Input {
         }
     }
 
-    pub fn ui_up_pressed(&self) -> bool {
-        self.p1_up_pressed || self.p2_up_pressed
-    }
-
-    pub fn ui_down_pressed(&self) -> bool {
-        self.p1_down_pressed || self.p2_down_pressed
-    }
-
     pub fn clear(&mut self) {
         self.p2_up_pressed = false;
         self.p2_down_pressed = false;
