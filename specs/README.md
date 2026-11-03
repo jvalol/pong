@@ -12,6 +12,7 @@ not a priority, and it never changes once a spec exists.
 | [0002](0002-paddles.md) | Paddle movement and bounds |
 | [0003](0003-ball.md) | Ball movement, bounces, and scoring |
 | [0004](0004-game-flow.md) | Menu, serving, pausing, and game over |
+| [0005](0005-a-picture-of-a-rally.md) | The staged rally held against a picture of it, through the engine's overlay harness |
 
 ---
 

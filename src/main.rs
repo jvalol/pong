@@ -16,6 +16,6 @@ pub fn staged() -> bool {
 }
 
 fn main() {
-    let pong_game = PongGame::new();
+    let pong_game = PongGame::new(staged());
     start("Pong", Box::new(pong_game));
 }

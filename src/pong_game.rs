@@ -57,7 +57,11 @@ pub struct PongGame {
 }
 
 impl PongGame {
-    pub fn new() -> Self {
+    /// `staged` rather than a call to `crate::staged()`, so that a picture
+    /// test can ask for the photographed state without putting
+    /// `--screenshot` in its own arguments. `main` passes what the
+    /// arguments say.
+    pub fn new(staged: bool) -> Self {
         Self {
             input: Input::new(),
             events: Vec::new(),
@@ -69,7 +73,7 @@ impl PongGame {
             game_over_system: GameOverSystem,
             visibility_system: VisibilitySystem,
             sound_pack: SoundPack::new(),
-            staged: crate::staged(),
+            staged,
             posed: false,
         }
     }
@@ -202,8 +206,52 @@ impl Game for PongGame {
 mod tests {
     use super::*;
 
+    /// How big the picture is: the engine's own size, said once there and
+    /// read here, per its spec 0062.
+    const WIDE: u32 = blitzkit::picture::SIZE.0;
+    const TALL: u32 = blitzkit::picture::SIZE.1;
+
+    /// A rally in play, held against a picture of it. Spec 0005.
+    ///
+    /// **Through the overlay call, because pong is all overlay.** Every
+    /// quad it has goes into `Geometry` and it never touches `Scene`, so
+    /// the 3D-only harness photographs a blank frame of it. The engine's
+    /// spec 0078 is that call.
+    ///
+    /// **The staging was already here.** `--screenshot` serves the game to
+    /// itself, because a photograph of the main menu says nothing about
+    /// pong. That is the frame `refresh-screenshots` takes, so this holds
+    /// the picture that is already on show.
+    ///
+    /// One `update` at no time at all. The serve is set up on the first
+    /// one, and a `dt` of nought means the ball does not travel between
+    /// that and the shutter.
+    #[test]
+    fn a_rally_in_play_looks_right() {
+        let reference =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/pictures/in-play.png");
+
+        blitzkit::picture::drawn_with_overlay_looks_right(
+            &reference,
+            (WIDE, TALL),
+            |renderer, geometry, text| {
+                let mut game = PongGame::new(true);
+                let sound = SoundSystem::new();
+                let mut scene = blitzkit::renderer::scene::Scene::new();
+                let mut camera = blitzkit::camera::Camera::new();
+
+                game.load(renderer);
+                game.initialize(geometry, text, &sound, (WIDE as f32, TALL as f32));
+                game.update(0.0, geometry, text, &sound);
+                game.draw(&mut scene, &mut camera);
+
+                (scene, camera)
+            },
+        );
+    }
+
     fn game_in(game_state: GameState) -> PongGame {
-        let mut game = PongGame::new();
+        let mut game = PongGame::new(false);
         game.state.layout((800.0, 600.0).into());
         game.state.game_state = game_state;
         game
